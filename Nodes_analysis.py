@@ -7,6 +7,7 @@ nodes = [(0,0.5,0), #3
          (0.35,0.85,0.25)] #10
 
 force_dict = {
+    "F": -3,
     6: 1.716,
     7: 0.098,
     8: 0.136,
@@ -20,9 +21,11 @@ force_dict = {
     19: 5.143,
     20: -1.366,
 }
+calc_forces = [0, 0, 0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0, 0,0, 0,0, 0,0, 0,0, -3] #1-20 and the last one "-1" is force F
 #angles are between 0 and 0.5pi, where 0 is horizontal and the pi is left out for clear comparison.
 # cos(a) will be the horizontal component and sin(a) the vertical
 angle_dict = {
+    -1: [0.5, 0, 0.5],
     6: [0.5, 0.0, 0.5],
     7: [0.32797913037736937, 0.17202086962263075, 0.5],
     8: [0.6211189415908434, 0.12111894159084333, 0.5],
@@ -33,6 +36,8 @@ angle_dict = {
     13: [0.4631625679551186, 0.2003931591710909, 0.3040867239846964],
     14: [0.12566591637800234, 0.3743340836219976, 0.5],
     15: [0.6068103096969111, 0.22107814162091644, 0.3150767403019983],
+    17: [0.13427118575450062, 0.4514102096524711, 0.3758747875120568],
+    18: [0.1778076844893528, 0.3221923155106473, 0.5],
     19: [0.0, 0.5, 0.5],
     20: [0.5, 0.5, 0.0]
 }
@@ -53,32 +58,64 @@ def angler(pos2):
     dy = new_pos[1]-pos2[1]
     return math.atan(dy/dx)
 
-def forceX(i):
-    return force_dict[i]*math.cos(angle_dict[i][0]*math.pi)
+def forceX(mF, new):
+    Fx = 0
+    for i in range(len(mF)):
+        Fx += calc_forces[mF[i]]*math.cos(angle_dict[mF[i]][0])
+    
+    return Fx
 
-def forceY(i):
-    return force_dict[i]*math.cos(angle_dict[i][1]*math.pi)
+def forceY(mF, new):
+    Fy = 0
+    for i in range(len(mF)):
+        Fy += calc_forces[mF[i]]*math.cos(angle_dict[mF[i]][1])
+    return Fy
 
-def forceZ(i):
-    return force_dict[i]*math.cos(angle_dict[i][2]*math.pi)
-#sum of forces in joint 10
-Fx = 2*forceX(13) + 2*forceX(15) - forceX(19)
-print(Fx, " Fx")
-Fz = 2*forceZ(13) + 2*forceZ(15) #should be 0 is not right now
-Fy = 2*forceY(13) + 2*forceY(15) + forceY(19)
-angle = angler(nodes[4])
-T14 = math.sqrt(Fx**2 + Fy**2 + Fz**2)
-print(T14)
+def solve_joint(mForces, newForces):
+    if len(newForces) > 2:
+        print("too many unknowns!")
+        return
+    #sum of forces in X
+    Fx = forceX(mForces, newForces)
+    #sum of forces in Y
+    Fy = forceY(mForces, newForces)
 
-#calculating T11 with joint 3:
-Fy = forceY(6)
-T11 = Fy/math.cos(angle_dict[11][1]*math.pi)
-print(T11)
+    #just to make the code "cleaner"
+    angleX1 = math.cos(angle_dict[newForces[0]][0])
+    angleY1 = math.cos(angle_dict[newForces[0]][1])
+    angleX2 = math.cos(angle_dict[newForces[1]][0])
+    angleY2 = math.cos(angle_dict[newForces[1]][1])
 
-#sum of forces in joint 4 (y)
-for i in range(5):
-    angle = angler(nodes[0])
-    forceY(12)
+    if not newForces[1]: #only one unknown, easy case
+        T1 = -Fx/angleX1
+        return T1
+    elif angleX1: #whether unknown force 1 has an x component
+        if not angleX2: #Whether unknown force 2 has an x component
+            T1 = -Fx / angleX1
+            T2 = -Fy - T1*angleY1
+        elif angleY1: #both forces have an x component and the y sum is needed (most common and elaborate case)
+            if angleY2:
+                #T1 = -Fx - T2*angleX2
+                #T1 = -Fy - T2*angleY2
+                T2 = (Fx-Fy)/(angleY2 - angleX2)
+                T1 = -Fx - T2*angleX2
+            else:
+                T1 = -Fy/angleY1
+                T2 = -Fx - T1*angleX1
+        else:
+            T2 = -Fy/angleY2
+            T1 = -Fx - T2*angleX2
+    else:
+        T2 = -Fx/angleX2
+    # sum check
+    sum = T1*angleX1 + T2*angleX2 + Fx
+    print(sum, " = sum of forces")
+    calc_forces[newForces[0]] = T1
+    calc_forces[newForces[1]] = T2
+    return T1, T2
+
+#sum of forces in joint 5
+print(solve_joint([-1], [17, 18]))
 
 #material use:
 for y in range(5):
