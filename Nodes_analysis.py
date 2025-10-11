@@ -7,7 +7,7 @@ nodes = [(0,0.5,0), #3
          (0.35,0.85,0.25)] #10
 
 force_dict = {
-    "F": -3,
+    -1: -3,
     6: 1.716,
     7: 0.098,
     8: 0.136,
@@ -61,17 +61,18 @@ def angler(pos2):
 def forceX(mF, new):
     Fx = 0
     for i in range(len(mF)):
-        Fx += calc_forces[mF[i]]*math.cos(angle_dict[mF[i]][0])
-    
+        Fx += calc_forces[mF[i]]*math.cos(angle_dict[mF[i]][0]*math.pi)
+    if Fx < 0.01:
+        Fx = 0
     return Fx
 
 def forceY(mF, new):
     Fy = 0
     for i in range(len(mF)):
-        Fy += calc_forces[mF[i]]*math.cos(angle_dict[mF[i]][1])
+        Fy += calc_forces[mF[i]]*math.cos(angle_dict[mF[i]][1]*math.pi)
     return Fy
 
-def solve_joint(mForces, newForces):
+def solve_joint(mForces, newForces, kg):
     if len(newForces) > 2:
         print("too many unknowns!")
         return
@@ -80,25 +81,25 @@ def solve_joint(mForces, newForces):
     #sum of forces in Y
     Fy = forceY(mForces, newForces)
 
-    #just to make the code "cleaner"
-    angleX1 = math.cos(angle_dict[newForces[0]][0])
-    angleY1 = math.cos(angle_dict[newForces[0]][1])
-    angleX2 = math.cos(angle_dict[newForces[1]][0])
-    angleY2 = math.cos(angle_dict[newForces[1]][1])
+    #just to make the code "cleaner" will be replaced by a function that computes the angle instead of getting them from the list
+    angleX1 = math.cos(angle_dict[newForces[0]][0]*math.pi)
+    angleY1 = math.cos(angle_dict[newForces[0]][1]*math.pi)
+    angleX2 = math.cos(angle_dict[newForces[1]][0]*math.pi)
+    angleY2 = math.cos(angle_dict[newForces[1]][1]*math.pi)
 
     if not newForces[1]: #only one unknown, easy case
-        T1 = -Fx/angleX1
+        T1 = -Fx/(angleX1*kg[0])
         return T1
     elif angleX1: #whether unknown force 1 has an x component
         if not angleX2: #Whether unknown force 2 has an x component
-            T1 = -Fx / angleX1
-            T2 = -Fy - T1*angleY1
+            T1 = -Fx / (angleX1*kg[0])
+            T2 = -Fy - T1*angleY1*kg[0]
         elif angleY1: #both forces have an x component and the y sum is needed (most common and elaborate case)
             if angleY2:
                 #T1 = -Fx - T2*angleX2
                 #T1 = -Fy - T2*angleY2
-                T2 = (Fx-Fy)/(angleY2 - angleX2)
-                T1 = -Fx - T2*angleX2
+                T2 = (Fx-Fy)/(angleY2 - angleX2) / kg[1]
+                T1 = (-Fx - T2*angleX2*kg[1])/kg[0]
             else:
                 T1 = -Fy/angleY1
                 T2 = -Fx - T1*angleX1
@@ -108,14 +109,14 @@ def solve_joint(mForces, newForces):
     else:
         T2 = -Fx/angleX2
     # sum check
-    sum = T1*angleX1 + T2*angleX2 + Fx
-    print(sum, " = sum of forces")
+    sum = T1*angleX1 + T2*angleX2 + Fx #should by definition always return 0.  I tested it, it gave -0.115 != 0
+    print(sum, " = sum of forces with Fx =", Fx)
     calc_forces[newForces[0]] = T1
     calc_forces[newForces[1]] = T2
     return T1, T2
 
 #sum of forces in joint 5
-print(solve_joint([-1], [17, 18]))
+print(solve_joint([-1], [17, 18], [2, 1]))
 
 #material use:
 for y in range(5):
