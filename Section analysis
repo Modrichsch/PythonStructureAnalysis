@@ -1,0 +1,80 @@
+# This is a sample Python script.
+import math
+# Press Shift+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+from math import *
+from scipy.optimize import fsolve
+def findangle(coordinates):
+    #coordinates: is 2D arry with cordinates of each joint in it
+    #returns angles of the beam with respect to the HORIZON
+    vector1=[coordinates[0][0]-coordinates[1][0],coordinates[0][1]-coordinates[1][1]]
+    vector2=[coordinates[1][0]-coordinates[2][0],coordinates[1][1]-coordinates[2][1]]
+    vector3=[coordinates[2][0]-coordinates[0][0],coordinates[2][1]-coordinates[0][1]]
+    ang1=atan(vector1[1]/vector1[0])
+    ang2=atan(vector2[1]/vector2[0])
+    ang3=atan(vector3[1]/vector3[0])
+    return ang1,ang2,ang3
+def findforcesjoint5(coordinates):#give coordinteas of 1 6 and 5 IN THAT EXACT ORDER
+    ang=findangle(coordinates)
+    print(ang)
+    guess=(-99999,99999)
+    def equations(vars):
+        a, b=vars
+        eq1=b*sin(ang[1])+a*sin(ang[2])-4500
+        eq2=b*cos(ang[1])+a*cos(ang[2])
+        return [eq1,eq2]
+    return fsolve(equations,guess)
+def findforcesjoint6(coordinates):#1 10 6 5
+    rightang=findangle([coordinates[0],coordinates[2],coordinates[3]])#1 6 5
+    leftang=findangle([coordinates[0],coordinates[1],coordinates[2]])#1 10 6
+    #rightang 1-6:0 1-5:1
+    #leftang 1-10:0 10-6:1 1-6:2
+    guess = (0, 0,0)
+    p1 = coordinates[0]
+    p5 = coordinates[3]
+    p6 = coordinates[2]
+    dx = p5[0] - p1[0]
+    dy = p5[1] - p1[1]
+    L = sqrt(dx * dx + dy * dy)
+    u = [dx / L, dy / L]
+    # Vectors
+    r15 = (p5[0] - p1[0], p5[1] - p1[1])
+    r16 = (p6[0] - p1[0], p6[1] - p1[1])
+
+    # Cross product (2D scalar)
+    cross = r16[0] * r15[1] - r16[1] * r15[0]
+    # Magnitude of r15
+    L15 = sqrt(r15[0] ** 2 + r15[1] ** 2)
+
+    # Perpendicular distance/ arm length
+    d_perp = abs(cross) / L15
+    dist = p5[0] - p6[0]
+
+    def equations(vars):
+        a, b, c = vars  # a=F(1-5), b=F(1-6), c=F(10-6)
+
+        eq1 = a * sin(rightang[2]) - b * sin(rightang[0]) - c * sin(leftang[1]) - 4500
+
+        eq2 = a * cos(rightang[2]) - b * cos(rightang[0]) - c * cos(leftang[1])
+
+        eq3 = a * d_perp - 4500 * dist
+
+        return [eq1, eq2, eq3]
+
+    return fsolve(equations,guess)
+def findforcesjoint10(coordinates):#9 10 6 1
+    leftang=findangle([coordinates[0],coordinates[1],coordinates[3]])#9 10 1
+    rightang=findangle([coordinates[3],coordinates[1],coordinates[2]])#1 10 6
+    dist=coordinates[1][1] - coordinates[0][1]#y of 10- y of 9
+    dist2=110-coordinates[1][0]
+    guess = (0, 0,0)
+    def eqations(vars):
+        a, b, c = vars#6-10 10-1 1-9
+        eq1=a*sin(rightang[1])+b*sin(rightang[0])-c*sin(leftang[2])-4500
+        eq2=a*cos(rightang[1])+b*cos(rightang[0])-c*cos(leftang[2])
+        eq3=c*dist-dist2*4500
+        return [eq1, eq2, eq3]
+    return fsolve(eqations,guess)
+print(findforcesjoint10([[30,50],[35, 85],[70,85],[50,50]]))
+print(findforcesjoint6([[50,50],[35,85],[70,85],[110,60]]))
