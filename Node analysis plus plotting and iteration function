@@ -25,9 +25,10 @@ force_dict = {
     13: 1.825,
     14: 3.2,
     15: -2.507,
-    17: -1.152,
-    18: 4.469,
-    19: 5.143,
+    16: -1.6, #too high at the moment
+    17: -1.152, #slightly too high at the moment
+    18: 4.469, #slightly too high at the moment
+    19: 5.143, #too low
     20: -1.366,
 }
 
@@ -84,35 +85,23 @@ def forces(nodes):
 
         #just to make the code "cleaner" will be replaced by a function that computes the angle instead of getting them from the list
         angleX1 = math.cos(angles[newForces[0]])
-        angleY1 = math.cos(angles[newForces[1]])
-        angleX2 = math.sin(angles[newForces[0]])
+        angleX2 = math.cos(angles[newForces[1]])
+        angleY1 = math.sin(angles[newForces[0]])
         angleY2 = math.sin(angles[newForces[1]])
+        angleY = math.sin(angles[newForces[1]]+angles[newForces[0]])
 
         if not newForces[1]: #only one unknown, easy case
             T1 = -Fx/(angleX1*kg[0])
             return T1
-        elif angleX1: #whether unknown force 1 has an x component
-            if not angleX2: #Whether unknown force 2 has an x component
-                T1 = -Fx / (angleX1*kg[0])
-                T2 = -Fy - T1*angleY1*kg[0]
-            elif angleY1: #both forces have an x component and the y sum is needed (most common and elaborate case)
-                if angleY2:
-                    #T1 = -Fx - T2*angleX2
-                    #T1 = -Fy - T2*angleY2
-                    T2 = (Fx-Fy)/(angleY2 - angleX2) / kg[1]
-                    T1 = (-Fx - T2*angleX2*kg[1])/kg[0]
-                else:
-                    T1 = -Fy/angleY1
-                    T2 = -Fx - T1*angleX1
-            else:
-                T2 = -Fy/angleY2
-                T1 = -Fx - T2*angleX2
         else:
-            T2 = -Fx/angleX2
+            #T1 = -Fx - T2*angleX2
+            #T1 = -Fy - T2*angleY2
+            T2 = (Fx*angleX2-Fy)/(angleY*kg[1])
+            print(T2, Fx, Fy, kg[1])
+            T1 = (-Fx - T2*angleX2*kg[1])/kg[0]
         
         # sum check
-        sum = T1*angleX1 + T2*angleX2 + Fx #should by definition always return 0.  I tested it, it gave -0.115 != 0
-        print(sum, " = sum of forces with Fx =", Fx)
+        sum = T1*angleX1 + T2*angleX2 + Fx #should by definition return zero
         calc_forces[newForces[0]] = T1
         calc_forces[newForces[1]] = T2
         return T1, T2
@@ -120,12 +109,13 @@ def forces(nodes):
     #sum of forces in joint 5
     solve_joint([-1], [17, 18], [2, 1])
     solve_joint([18], [16, 19], [2, 1])
-    solve_joint([17, 20], [16, 19], [2, 1])
-    for i in range(20):
-        print(i, calc_forces[i])
     return calc_forces
 
-print(forces(ORnodes))
+result = forces(ORnodes)
+nr = -1
+for i in result:
+    nr += 1
+    print(i, " kN of force for ", nr)
 def plot(member:int,boundary_cond:list, change_node: int):#member: which member you would like to see | boundary_cond: limits of movement changenode: which node you would like to move
     nodes = {
     0: (0, 0, 0),
