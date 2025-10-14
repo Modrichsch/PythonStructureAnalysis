@@ -33,7 +33,6 @@ force_dict = {
 
 def forces(nodes):
     calc_forces = [0, 0, 0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0, 0,0, 0,0, 0,0, 0,0, -3] #1-20 and the last one "-1" is force F
-
     angles : tuple = [0]*22 #in sin
 
 
@@ -42,7 +41,7 @@ def forces(nodes):
         dy: float = nodes[n2][1] - nodes[n1][1]
         dz: float = nodes[n2][2] - nodes[n1][2]
         x: float = math.sqrt(dx**2 + dz**2)
-        angles[m] = math.atan(dy/(x+0.00000000001)) #creates the angles. The 0.0...1 is to prevent division by 0.
+        angles[m] = math.atan2(dy/(x)) #creates the angles
 
     angler(0, 3, 6)
     angler(0, 9, 7)
@@ -124,7 +123,8 @@ def forces(nodes):
         print(i, calc_forces[i])
     return calc_forces
 
-def plot(node,boundary_cond, changenode):#node:which node you would like to see | boundary_cond: limits of movement | changenode: which node you would like to move
+
+def plot(node: int,boundary_cond, changenode):#node:which node you would like to see | boundary_cond: limits of movement | changenode: which node you would like to move
     nodes = {
         0: (0, 0, 0),
         1: (0.5, 0.5, 0),
@@ -142,3 +142,4 @@ def plot(node,boundary_cond, changenode):#node:which node you would like to see 
             #ax=plt.axes(projection="3d")       # Disabled because I don't have the extension, if enabled ignore this message
             #ax.scatter([0],intrested_value[1],intrested_value[2])       # Disabled because I don't have the extension, if enabled ignore this message
     #plt.show()       # Disabled because I don't have the extension, if enabled ignore this message
+
