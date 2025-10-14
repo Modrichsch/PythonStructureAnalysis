@@ -135,11 +135,22 @@ def plot(node: int,boundary_cond, changenode):#node:which node you would like to
         6: (0.7, 0.85, 0.25),
         9: (0.3, 0.5, 0),
         10: (0.35, 0.85, 0.25)}
+def plot(member,boundary_cond, change_node):#member:which member ypu would like to see boundary_cond: limits of movement changenode: which node you would like to move
+    nodes = {
+    0: (0, 0, 0),
+    1: (0.5, 0.5, 0),
+    2: (0.5, 0, 0),
+    3: (0, 0.5, 0),
+    4: (0.18, 0.8, 0.25),
+    5: (1.1, 0.6, 0.25),
+    6: (0.7, 0.85, 0.25),
+    9: (0.3, 0.5, 0),
+    10: (0.35, 0.85, 0.25)}
+    ax = plt.axes(projection="3d")
     for y in range(boundary_cond[1][0],boundary_cond[1][1],0.001):
         for x in range(boundary_cond[0][0],boundary_cond[0][1],0.001):
-            nodes[changenode]=(ORnodes[changenode][0]+x,ORnodes[changenode][1]+y,ORnodes[changenode][2])
-            intrested_value = forces(node)[node] #Used to retrieve member force in the member???
-            #ax=plt.axes(projection="3d")       # Disabled because I don't have the extension, if enabled ignore this message
-            #ax.scatter([0],intrested_value[1],intrested_value[2])       # Disabled because I don't have the extension, if enabled ignore this message
-    #plt.show()       # Disabled because I don't have the extension, if enabled ignore this message
-
+            nodes[change_node]=(ORnodes[change_node][0]+x,ORnodes[change_node][1]+y,ORnodes[change_node][2])
+            intrested_value=forces[member][2]#the internal force value that we are intrested in
+            ax.scatter([0],intrested_value[1],intrested_value[2])
+    plt.show()
+    plot()

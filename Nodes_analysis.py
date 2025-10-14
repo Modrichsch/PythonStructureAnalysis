@@ -119,9 +119,3 @@ solve_joint([18], [16, 19], [2, 1])
 solve_joint([17, 20], [16, 19], [2, 1])
 for i in range(20):
     print(i, calc_forces[i])
-#material use function:
-
-
-#angle calculation automation
-for i in range(1):
-    pass
