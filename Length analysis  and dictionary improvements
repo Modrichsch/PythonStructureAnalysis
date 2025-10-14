@@ -1,0 +1,210 @@
+import math
+
+
+from pprint import pprint
+#import matplotlib.pyplot as plt         # Disabled because I don't have the extension, if enabled ignore this message
+#from mpl_toolkits import mplot3d       # Disabled because I don't have the extension, if enabled ignore this message
+
+def distance_diagonal(point1, point2):
+
+    return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2+(point1[2] - point2[2])**2)
+
+def length_member(member):
+    return distance_diagonal(ORnodes.get(member[0]), ORnodes.get(member[1]))
+
+Total_length = 0
+
+
+ORnodes = {
+    0: [0, 0, 0],
+    1: [0.5, 0.5, 0],
+    2: [0.5, 0, 0],
+    3: [0, 0.5, 0],
+    4: [0.18, 0.8, 0.25],
+    5: [1.1, 0.6, 0.25],
+    6: [0.7, 0.85, 0.25],
+    9: [0.3, 0.5, 0],
+    10: [0.35, 0.85, 0.25]
+}
+
+#for comparing to our design before the changes
+force_dict = {
+    -1: -3,
+    6: 1.716,
+    7: 0.098,
+    8: 0.136,
+    9: -0.966,
+    10: -1.682,
+    11: 2.459,
+    12: -1.726,
+    13: 1.825,
+    14: 3.2,
+    15: -2.507,
+    17: -1.152,
+    18: 4.469,
+    19: 5.143,
+    20: -1.366,
+}
+
+#format: member_number : (point1, point2)
+member_dict = {
+    6: [0, 3],
+    7: [0, 9],
+    8: [2, 9],
+    9: [3, 9],
+    10: [9, 1],
+    11: [3, 4],
+    12: [9, 4],
+    13: [9, 10],
+    14: [4, 10],
+    15: [1, 10],
+    16: [1, 6],
+    17: [1, 5],
+    18: [5, 6],
+    19: [10, 6]
+
+}
+#pprint(ORnodes)
+#pprint(force_dict)
+pprint(member_dict)
+
+member_lengths = []
+
+
+for key, value in member_dict.items():
+    member_and_length = []
+    member_and_length.append(value)
+    length = length_member(value)
+    member_and_length.append(length)
+
+    member_dict[key] = member_and_length
+
+    member_lengths.append(member_and_length)
+    Total_length += length
+
+pprint(member_lengths)
+pprint(member_dict)
+print(Total_length)
+def forces(nodes):
+    calc_forces = [0, 0, 0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0, 0,0, 0,0, 0,0, 0,0, -3] #1-20 and the last one "-1" is force F
+
+    angles : tuple = [0]*22 #in sin
+
+
+    def angler(n1: int, n2: int, m: int):
+        dx: float = nodes[n2][0] - nodes[n1][0]
+        dy: float = nodes[n2][1] - nodes[n1][1]
+        dz: float = nodes[n2][2] - nodes[n1][2]
+        x: float = math.sqrt(dx**2 + dz**2)
+        angles[m] = math.atan(dy/(x+0.00000000001)) #creates the angles. The 0.0...1 is to prevent division by 0.
+#point1 point 2 member number
+    angler(0, 3, 6)
+    angler(0, 9, 7)
+    angler(2, 9, 8)
+    angler(3, 9, 9)
+    angler(9, 1, 10)
+    angler(3, 4, 11)
+    angler(9, 4, 12)
+    angler(9, 10, 13)
+    angler(4, 10, 14)
+    angler(1, 10, 15)
+    angler(1, 6, 16)
+    angler(1, 5, 17)
+    angler(5, 6, 18)
+    angler(10, 6, 19)
+    angles.append(0)
+    angles[-1] = 0.5*math.pi
+
+    def forceX(mF: int):
+        Fx = 0
+        for i in range(len(mF)):
+            Fx += calc_forces[mF[i]]*math.cos(angles[mF[i]])
+        return Fx
+
+    def forceY(mF: int):
+        Fy = 0
+        for i in range(len(mF)):
+            Fy += calc_forces[mF[i]]*math.sin(angles[mF[i]])
+        return Fy
+
+    def solve_joint(mForces, newForces, kg):
+        if len(newForces) > 2:
+            print("too many unknowns!")
+            return
+        #sum of forces in X
+        Fx: float = forceX(mForces)
+        #sum of forces in Y
+        Fy: float = forceY(mForces)
+
+        #just to make the code "cleaner" will be replaced by a function that computes the angle instead of getting them from the list
+        angleX1 = math.cos(angles[newForces[0]])
+        angleY1 = math.cos(angles[newForces[1]])
+        angleX2 = math.sin(angles[newForces[0]])
+        angleY2 = math.sin(angles[newForces[1]])
+
+        if not newForces[1]: #only one unknown, easy case
+            T1 = -Fx/(angleX1*kg[0])
+            return T1
+        elif angleX1: #whether unknown force 1 has an x component
+            if not angleX2: #Whether unknown force 2 has an x component
+                T1 = -Fx / (angleX1*kg[0])
+                T2 = -Fy - T1*angleY1*kg[0]
+            elif angleY1: #both forces have an x component and the y sum is needed (most common and elaborate case)
+                if angleY2:
+                    #T1 = -Fx - T2*angleX2
+                    #T1 = -Fy - T2*angleY2
+                    T2 = (Fx-Fy)/(angleY2 - angleX2) / kg[1]
+                    T1 = (-Fx - T2*angleX2*kg[1])/kg[0]
+                else:
+                    T1 = -Fy/angleY1
+                    T2 = -Fx - T1*angleX1
+            else:
+                T2 = -Fy/angleY2
+                T1 = -Fx - T2*angleX2
+        else:
+            T2 = -Fx/angleX2
+        # sum check
+        sum = T1*angleX1 + T2*angleX2 + Fx #should by definition always return 0.  I tested it, it gave -0.115 != 0
+        print(sum, " = sum of forces with Fx =", Fx)
+        calc_forces[newForces[0]] = T1
+        calc_forces[newForces[1]] = T2
+        return T1, T2
+
+    #sum of forces in joint 5
+    solve_joint([-1], [17, 18], [2, 1])
+    solve_joint([18], [16, 19], [2, 1])
+    solve_joint([17, 20], [16, 19], [2, 1])
+    for i in range(20):
+        print(i, calc_forces[i])
+    return calc_forces
+
+def plot(node,boundary_cond, changenode):#node:which node you would like to see | boundary_cond: limits of movement | changenode: which node you would like to move
+    nodes = {
+        0: (0, 0, 0),
+        1: (0.5, 0.5, 0),
+        2: (0.5, 0, 0),
+        3: (0, 0.5, 0),
+        4: (0.18, 0.8, 0.25),
+        5: (1.1, 0.6, 0.25),
+        6: (0.7, 0.85, 0.25),
+        9: (0.3, 0.5, 0),
+        10: (0.35, 0.85, 0.25)}
+    def plot(member,boundary_cond, change_node):#member:which member ypu would like to see boundary_cond: limits of movement changenode: which node you would like to move
+        nodes = {
+            0: (0, 0, 0),
+            1: (0.5, 0.5, 0),
+            2: (0.5, 0, 0),
+            3: (0, 0.5, 0),
+            4: (0.18, 0.8, 0.25),
+            5: (1.1, 0.6, 0.25),
+            6: (0.7, 0.85, 0.25),
+            9: (0.3, 0.5, 0),
+            10: (0.35, 0.85, 0.25)}
+        ax = plt.axes(projection="3d")
+        for y in range(boundary_cond[1][0],boundary_cond[1][1],0.001):
+                for x in range(boundary_cond[0][0],boundary_cond[0][1],0.001):
+                        nodes[change_node]=(ORnodes[change_node][0]+x,ORnodes[change_node][1]+y,ORnodes[change_node][2])
+                        intrested_value=forces[member][2]#the internal force value that we are intrested in
+                        ax.scatter([0],intrested_value[1],intrested_value[2])
+        plt.show()
+    plot()
