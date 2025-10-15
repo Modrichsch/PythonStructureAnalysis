@@ -1,0 +1,437 @@
+
+import time
+from idlelib.configdialog import changes
+
+start_time = time.time()
+
+F_load = 4500
+
+
+import math
+from pprint import pprint
+
+def distance_diagonal(point1, point2):
+    return math.sqrt((point1[1] - point2[1])**2 + (point1[2] - point2[2])**2)
+
+def length_member(member):
+    return distance_diagonal(points[member[1]], points[member[2]])
+
+
+def Number_t_Number_format(member):
+    number1 = 0
+    number2 = 0
+    number1 = member[1]
+    number2 = member[2]
+    number_to_number = f"{str(number1)}t{str(number2)}"
+    return number_to_number
+
+
+
+
+points = [
+    [0, 0.0, 0.0],
+    [1, 0.5, 0.5],
+    [2, 0.5, 0.0],
+    [3, 0.0, 0.5],
+    [4, 0.18, 0.8],
+    [5, 1.1, 0.6],
+    [6, 0.7, 0.85],
+    [7, 0.5, 0.25],
+    [8, 0.0, 0.25],
+    [9, 0.3, 0.5],
+    [10, 0.35, 0.85]
+]
+
+members = [
+    [0,0,0], #This is purely there to make referening to individual members easier
+    [1, 0, 2],
+    [2, 0, 8],
+    [3, 2, 8],
+    [4, 2, 7],
+    [5, 8, 7],
+    [6, 8, 3],
+    [7, 3, 7],
+    [8, 7, 1],
+    [9, 3, 9],
+    [10, 9, 1],
+    [11, 3, 4],
+    [12, 9, 4],
+    [13, 9, 10],
+    [14, 4, 10],
+    [15, 1, 10],
+    [16, 1, 6],
+    [17, 1, 5],
+    [18, 5, 6],
+    [19, 6, 10],
+]
+pprint(members)
+
+member_lengths = []
+
+for x in members:
+    member_and_length = []
+    member_and_length.append(x)
+    length = length_member(x)
+    member_and_length.append(length)
+    member_and_length.append
+
+
+    member_lengths.append(member_and_length)
+
+pprint(member_lengths)
+
+
+
+
+
+
+
+# alfa = math.degrees(math.atan((points[6][2]-points[5][2])/(points[5][1]-points[6][1])))
+# theta = math.degrees(math.atan((points[5][2]-points[1][2])/(points[5][1]-points[1][1])))
+
+
+def Total_angle_calculator(member1, member2):
+#Check if members are connected:
+    if member1[1] == member2[1]:
+        Ax = points[member1[1]][1]
+        Ay = points[member1[1]][2]
+        Bx = points[member2[2]][1]
+        By = points[member2[2]][2]
+        Cx = points[member1[2]][1]
+        Cy = points[member1[2]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy,"1")
+    elif member1[2] == member2[2]:
+        Ax = points[member1[2]][1]
+        Ay = points[member1[2]][2]
+        Bx = points[member2[1]][1]
+        By = points[member2[1]][2]
+        Cx = points[member1[1]][1]
+        Cy = points[member1[1]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "2")
+    elif member1[1] == member2[2]:
+        Ax = points[member1[1]][1]
+        Ay = points[member1[1]][2]
+        Bx = points[member2[1]][1]
+        By = points[member2[1]][2]
+        Cx = points[member1[2]][1]
+        Cy = points[member1[2]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "3")
+    elif member1[2] == member2[1]:
+        Ax = points[member1[2]][1]
+        Ay = points[member1[2]][2]
+        Bx = points[member2[2]][1]
+        By = points[member2[2]][2]
+        Cx = points[member1[1]][1]
+        Cy = points[member1[1]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "4")
+    else:
+        #print("Members not connected")
+        return None
+
+
+
+
+# Angle calculation:
+    if Ax-Cx == 0:
+        bottom_angle = 90
+        #print("e")
+
+    else:
+        if (((Ay < By and Ay < Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx))) or ((Ay > By and Ay > Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx)))):
+            bottom_angle = math.degrees(math.atan((Ax - Cx)/(Ay - Cy) ))
+
+        else:
+            bottom_angle = math.degrees(math.atan((Ay-Cy)/(Ax-Cx)))
+
+
+
+    if Bx-Ax == 0:
+        top_angle = 90
+        #print("t")
+
+    else:
+        if (((Ay < By and Ay < Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx))) or ((Ay > By and Ay > Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx)))):
+
+            top_angle = math.degrees(math.atan((Bx - Ax)/(By - Ay) ))
+        else:
+            top_angle = math.degrees(math.atan((By-Ay)/(Bx-Ax)))
+
+
+
+
+
+
+    total_angle = abs(bottom_angle) + abs(top_angle) #*angle_multiplier
+
+    return total_angle
+
+
+def Top_angle_calculator(member1, member2):
+#Check if members are connected:
+    if member1[1] == member2[1]:
+        Ax = points[member1[1]][1]
+        Ay = points[member1[1]][2]
+        Bx = points[member2[2]][1]
+        By = points[member2[2]][2]
+        Cx = points[member1[2]][1]
+        Cy = points[member1[2]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy,"1")
+    elif member1[2] == member2[2]:
+        Ax = points[member1[2]][1]
+        Ay = points[member1[2]][2]
+        Bx = points[member2[1]][1]
+        By = points[member2[1]][2]
+        Cx = points[member1[1]][1]
+        Cy = points[member1[1]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "2")
+    elif member1[1] == member2[2]:
+        Ax = points[member1[1]][1]
+        Ay = points[member1[1]][2]
+        Bx = points[member2[1]][1]
+        By = points[member2[1]][2]
+        Cx = points[member1[2]][1]
+        Cy = points[member1[2]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "3")
+    elif member1[2] == member2[1]:
+        Ax = points[member1[2]][1]
+        Ay = points[member1[2]][2]
+        Bx = points[member2[2]][1]
+        By = points[member2[2]][2]
+        Cx = points[member1[1]][1]
+        Cy = points[member1[1]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "4")
+    else:
+        #print("Members not connected")
+        return None
+
+
+# Angle calculation:
+    if Bx-Ax == 0:
+        top_angle = 90
+        #print("t")
+
+    else:
+        if (((Ay < By and Ay < Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx))) or ((Ay > By and Ay > Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx)))):
+
+            top_angle = abs(math.degrees(math.atan((Bx - Ax)/(By - Ay) )))
+        else:
+            top_angle = abs(math.degrees(math.atan((By-Ay)/(Bx-Ax))))
+
+    return top_angle
+
+def Bottom_angle_calculator(member1, member2):
+#Check if members are connected:
+    if member1[1] == member2[1]:
+        Ax = points[member1[1]][1]
+        Ay = points[member1[1]][2]
+        Bx = points[member2[2]][1]
+        By = points[member2[2]][2]
+        Cx = points[member1[2]][1]
+        Cy = points[member1[2]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy,"1")
+    elif member1[2] == member2[2]:
+        Ax = points[member1[2]][1]
+        Ay = points[member1[2]][2]
+        Bx = points[member2[1]][1]
+        By = points[member2[1]][2]
+        Cx = points[member1[1]][1]
+        Cy = points[member1[1]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "2")
+    elif member1[1] == member2[2]:
+        Ax = points[member1[1]][1]
+        Ay = points[member1[1]][2]
+        Bx = points[member2[1]][1]
+        By = points[member2[1]][2]
+        Cx = points[member1[2]][1]
+        Cy = points[member1[2]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "3")
+    elif member1[2] == member2[1]:
+        Ax = points[member1[2]][1]
+        Ay = points[member1[2]][2]
+        Bx = points[member2[2]][1]
+        By = points[member2[2]][2]
+        Cx = points[member1[1]][1]
+        Cy = points[member1[1]][2]
+        #print(Ax, Ay, Bx, By, Cx, Cy, "4")
+    else:
+        #print("Members not connected")
+        return None
+
+# Angle calculation:
+    if Ax-Cx == 0:
+        bottom_angle = 90
+        #print("e")
+
+    else:
+        if (((Ay < By and Ay < Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx))) or ((Ay > By and Ay > Cy) and ((Ax < Bx and Ax > Cx)or(Ax > Bx and Ax < Cx)))):
+            bottom_angle = abs(math.degrees(math.atan((Ax - Cx)/(Ay - Cy) )))
+
+        else:
+            bottom_angle = abs(math.degrees(math.atan((Ay-Cy)/(Ax-Cx))))
+
+    return bottom_angle
+#Forces & Angles
+# alfa = Top_angle_calculator(members[17], members[18])
+# theta = Bottom_angle_calculator(members[17], members[18])
+# phi = Total_angle_calculator(members[16], members[19])
+# beta = 90-Top_angle_calculator(members[16], members[18])
+#
+#
+# F8 = -(11/5)*F_load
+# F7 = 0
+# F6 = (6/5)*F_load
+# F5 = 0
+# F4 = -(11/5)*F_load
+# F3 = 0
+# F2 = (6/5)*F_load
+# F1 = 0
+# # F19
+# F18 = (F_load/(math.sin(math.radians(alfa))-(math.sin(math.radians(theta))*-((math.cos(math.radians(alfa)))/(math.cos(math.radians(theta)))))))
+# F17 = -F18*(math.cos(math.radians(alfa))/(math.cos(math.radians(theta))))
+# F16 = -F18*(math.sin(math.radians(beta))/(math.sin(math.radians(phi))))
+# F15 = (F8-math.cos(math.radians(Bottom_angle_calculator(members[16], members[15])))*F16-F17*math.sin(math.radians(theta)))/math.cos(math.radians(Top_angle_calculator(members[16], members[15])))
+# F11 = F6/math.cos(math.radians(90-Total_angle_calculator(members[11], members[9])))
+# F9 = F11*math.cos(math.radians(Total_angle_calculator(members[11], members[9])))
+# F10 = F17*math.cos(math.radians(theta)) + F16*math.cos(math.atan((points[6][2]-points[1][2])/(points[6][1]-points[1][1]))) - -F15*math.cos(math.radians(180-Total_angle_calculator(members[15], members[10])))
+# F14
+# F13
+#F12
+
+
+
+
+
+# print(math.sin(alfa))
+#
+#
+#
+# print(f"Total {Total_angle_calculator(members[16], members[15])}")
+# print(f"Top {Top_angle_calculator(members[16], members[15])}")
+# print(f"Bottom {Bottom_angle_calculator(members[16], members[15])}")
+#
+# print(f"Load {F_load} alfa {alfa} beta {beta} theta {theta} phi {phi} F18 {F18} F17 {F17} F16 {F16} F15 {F15} F11 {F11} F9 {F9}")
+# print(Total_angle_calculator(members[17], members[16]))
+# print(Top_angle_calculator(members[16], members[15]))
+# print(Bottom_angle_calculator(members[16], members[15]))
+# print(Total_angle_calculator(members[10], members[15]))
+# print(Total_angle_calculator(members[11], members[9]))
+# print(Total_angle_calculator(members[16], members[19]))
+# for i in range(1,19):
+#     text = F+i
+#     print(text)
+
+
+
+
+# print(theta + (math.atan()
+def iterate(bond_condtions):
+    member0 = length_member([0, 0, 0])
+    member1 = length_member([1, 0, 2])
+    member2 = length_member([2, 0, 8])
+    member3 = length_member([3, 2, 8])
+    member4 = length_member([4, 2, 7])
+    member5 = length_member([5, 8, 7])
+    member6 = length_member([6, 8, 3])
+    member7 = length_member([7, 3, 7])
+    member8 = length_member([8, 7, 1])
+    member9 = length_member([9, 3, 9])
+    member10 = length_member([10, 9, 1])
+    member17 = length_member([17, 1, 5])
+    member11 = length_member([11, 3, 4])
+    member12 = length_member([12, 9, 4])
+    member13 = length_member([13, 9, 10])
+    member14 = length_member([14, 4, 10])
+    member15 = length_member([15, 1, 10])
+    member16 = length_member([16, 1, 6])
+    member18 = length_member([18, 5, 6])
+    member19 = length_member([19, 6, 10])
+    small_unchanging = member1 + member2 + member3 + member5 + member6 + member7
+    L_unchanging = member4 + member8 + member17 + member9 + member10
+    small_totalB = small_unchanging + member11 + member13 + member14 + member19 + member18
+    L_totalB = L_unchanging + member12 + member15 + member16
+    TotalB=small_totalB + L_totalB
+    TotalLow = small_totalB + L_totalB
+    #4 10 6
+    print("a")
+    OGy4=int(points[4][2]*100)
+    OGx4=int(points[4][1]*100)
+    OGy10=int(points[10][2]*100)
+    OGx10=int(points[10][1]*100)
+    OGy6=int(points[6][2]*100)
+    OGx6=int(points[6][1]*100)
+    counter=0
+#100 cause of for loop that can not iterate with floats so we convert m to cm
+    for y4 in range(OGy4-bond_condtions,OGy4,1):
+        points[4][2]=y4/100
+        for x4 in range(OGx4-bond_condtions//2,OGx4+bond_condtions//2,1):
+            points[4][1] = x4/100
+            for y10 in range(OGy10-bond_condtions,OGy10,1):
+                points[10][2] = y10/100
+                for x10 in range(OGx10-bond_condtions//2,OGx10+bond_condtions//2,1):
+                    points[10][1] = x10/100
+                    for y6 in range(OGy6-bond_condtions,OGy6,1):
+                        points[6][2] = y6/100
+                        for x6 in range(OGx6-bond_condtions//2,OGx6+bond_condtions//2,1):
+                            points[6][1] = x6/100
+                            alfa = Top_angle_calculator(members[17], members[18])
+                            theta = Bottom_angle_calculator(members[17], members[18])
+                            phi = Total_angle_calculator(members[16], members[19])
+                            beta = 90 - Top_angle_calculator(members[16], members[18])
+                            F8 = -(11/5)*F_load
+                            F7 = 0
+                            F6 = (6/5)*F_load
+                            F5 = 0
+                            F4 = -(11/5)*F_load
+                            F3 = 0
+                            F2 = (6/5)*F_load
+                            F1 = 0
+                            F18 = (F_load / (math.sin(math.radians(alfa)) - (math.sin(math.radians(theta)) * -(
+                                        (math.cos(math.radians(alfa))) / (math.cos(math.radians(theta)))))))
+                            F17 = -F18 * (math.cos(math.radians(alfa)) / (math.cos(math.radians(theta))))
+                            F16 = -F18 * (math.sin(math.radians(beta)) / (math.sin(math.radians(phi))))
+                            F15 = (F8 - math.cos(
+                                math.radians(Bottom_angle_calculator(members[16], members[15]))) * F16 - F17 * math.sin(
+                                math.radians(theta))) / math.cos(
+                                math.radians(Top_angle_calculator(members[16], members[15])))
+                            F11 = F6 / math.cos(math.radians(90 - Total_angle_calculator(members[11], members[9])))
+                            F9 = F11 * math.cos(math.radians(Total_angle_calculator(members[11], members[9])))
+                            F10 = F17 * math.cos(math.radians(theta)) + F16 * math.cos(math.atan(
+                                (points[6][2] - points[1][2]) / (points[6][1] - points[1][1]))) - -F15 * math.cos(
+                                math.radians(180 - Total_angle_calculator(members[15], members[10])))
+                            counter+=1
+                            print(length_member([16, 1, 6]))
+
+                            member11 = length_member([11, 3, 4])
+                            member12 = length_member([12, 9, 4])
+                            member13 = length_member([13, 9, 10])
+                            member14 = length_member([14, 4, 10])
+                            member15 = length_member([15, 1, 10])
+                            member16 = length_member([16, 1, 6])
+                            member18 = length_member([18, 5, 6])
+                            member19 = length_member([19,6,10])
+                            I=6.9*10**-10
+                            E=210*10**9
+                            Fk17=((math.pi)**2*E*I)/((0.5*member17)**2)
+                            Fk9 = ((math.pi) ** 2 * E * I) / ((0.5 * member9) ** 2)
+                            Fk10 = ((math.pi) ** 2 * E * I) / ((0.5 * member10) ** 2)
+                            Fk15 = ((math.pi) ** 2 * E * I) / ((0.5 * member15) ** 2)
+                            Fk16 = ((math.pi) ** 2 * E * I) / ((0.5 * member16) ** 2)
+                            small_total=small_unchanging+member11+member13+member14+member19+member18
+                            L_total=L_unchanging+member12+member15+member16
+                            Total=L_total+small_total
+                            if Fk9>-F9 and Fk10>-F10 and Fk15>-F15 and Fk16>-F16 and Fk17>-F17 and Total<TotalLow:
+                                TotalLow=Total
+                                print(f'New best found:{TotalLow}m 4:{x4,y4} 6:{x6,y6} 10:{x10,y10}'  )
+                                best_cord=[points[4],points[6],points[10]]
+                                print(best_cord)
+                            print(f"F9: {F9},F10: {F10},F15: {F15},F16: {F16},F17: {F17},,Length member 17:{member17},Fk at the member 17: {Fk17} Not gonna fail?:{-F17<Fk17} 3 by 15:{small_total} L-shape:{L_total},Total:{Total} Counter :{counter} G")
+
+    print(TotalLow,TotalB,best_cord)
+
+iterate(10)
+
+
+
+
+
+
