@@ -268,6 +268,16 @@ def Bottom_angle_calculator(member1, member2):
 
     return bottom_angle
 #Forces & Angles
+anglesrs : float = [0]*22
+
+def angler(n1: int, n2: int, m: int):
+    dx: float = points[n2][0] - points[n1][0]
+    if dx:
+        dy: float = points[n2][1] - points[n1][1]
+        dz: float = points[n2][2] - points[n1][2]
+        x: float = math.sqrt(dx**2 + dz**2)
+        anglesrs[m] = math.atan(dy/(x)) #creates the angles
+
 alfa = Top_angle_calculator(members[17], members[18])
 theta = Bottom_angle_calculator(members[17], members[18])
 phi = Total_angle_calculator(members[16], members[19])
@@ -282,16 +292,19 @@ F4 = -(11/5)*F_load
 F3 = 0
 F2 = (6/5)*F_load
 F1 = 0
-# F19
 F18 = (F_load/(math.sin(math.radians(alfa))-(math.sin(math.radians(theta))*-((math.cos(math.radians(alfa)))/(math.cos(math.radians(theta)))))))
 F17 = -F18*(math.cos(math.radians(alfa))/(math.cos(math.radians(theta))))
 F16 = -F18*(math.sin(math.radians(beta))/(math.sin(math.radians(phi))))
+angler(1, 2, 19)
+F19 = -(F18/math.sin(angle) + F16/math.sin(angle))
 F15 = (F8-math.cos(math.radians(Bottom_angle_calculator(members[16], members[15])))*F16-F17*math.sin(math.radians(theta)))/math.cos(math.radians(Top_angle_calculator(members[16], members[15])))
 F11 = F6/math.cos(math.radians(90-Total_angle_calculator(members[11], members[9])))
 F9 = F11*math.cos(math.radians(Total_angle_calculator(members[11], members[9])))
 F10 = F17*math.cos(math.radians(theta)) + F16*math.cos(math.atan((points[6][2]-points[1][2])/(points[6][1]-points[1][1]))) - -F15*math.cos(math.radians(180-Total_angle_calculator(members[15], members[10])))
-# F14
-# F13
+angler(9, 10, 13)
+angler(4, 10, 14)
+F13 = (2*T15*math.sin(anglesrs[14]) + (2*T15 + T19)*math.cos(anglesrs[14])) / (2*math.sin(anglesrs[13] - anglesrs[14]))
+F14 = (2*F13*math.cos(anglesrs[13])) / (math.cos(anglesrs[14]))
 #F12
 
 
